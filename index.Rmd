@@ -1,30 +1,39 @@
 ---
-title: "Climigr"
-author: "parth khare"
-date: '2022-08-04'
+title: "Climate Migration"
+author: "Parth Khare"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(data.table); library(leaflet); library(ggplot2);library(sf)
+options(scipen=99)
 ```
 
 ## Climate Migration: Data Trends
 
 ### Data
-- Sources
-- Handling different resolutions
-  - Clicim
+* Sources
+* Handling different resolutions
+  + Clicim
   
 
 ### Assumptions
-- Reducing dimensions
-  -  Weather: choosing months or annual values?
-    - months might display additional variability
-    - taking annual for first cut model
-  -  Weather: which years to consider ?
-    - Currenly taking difference from 1900 for all years overlapping with Clcim 
+* Reducing dimensions
+  +  Weather: choosing months or annual values?
+    + months might display additional variability
+    + taking annual for first cut model
+  +  Weather: which years to consider ?
+    + Currenly taking difference from 1900 for all years overlapping with Clcim 
 
-- Outliers
-  - Case of Tehran: 8 million emigrated in 1975
+* Outliers
+  + Case of Tehran: 8 million emigrated in 1975
 
+
+```{r, echo=F, warning=F, message=F}
+load('/Users/parthkhare/Desktop/CGD/Projects/Climate migration/data/merged/Udel_Clicim_merge_diffdimension/clicim_udel_12ann.RData')
+
+
+plot(clicim_udel_12ann["X197580"])
+
+```
