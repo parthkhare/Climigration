@@ -1,0 +1,30 @@
+---
+title: "Climigr"
+author: "parth khare"
+date: '2022-08-04'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Climate Migration: Data Trends
+
+### Data
+- Sources
+- Handling different resolutions
+  - Clicim
+  
+
+### Assumptions
+- Reducing dimensions
+  -  Weather: choosing months or annual values?
+    - months might display additional variability
+    - taking annual for first cut model
+  -  Weather: which years to consider ?
+    - Currenly taking difference from 1900 for all years overlapping with Clcim 
+
+- Outliers
+  - Case of Tehran: 8 million emigrated in 1975
+
