@@ -7,16 +7,68 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(data.table); library(leaflet); library(ggplot2);library(sf)
+library(dplyr); library(tidyverse)
 options(scipen=99)
 ```
 
 ## Climate Migration: Data Trends
 
-### Data
-* Sources
-* Handling different resolutions
-  + Clicim
+```{r, echo=F, warning=F, message=F}
+load('/Users/parthkhare/Desktop/CGD/Projects/Climate migration/data/merged/Udel_Clicim_merge_diffdimension/clicim_udel_12ann_wgrd.RData')
+
+
+# Temperature rise and migration I: all grids
+# ggplot(clicim_udel_12ann, aes(x=Tmp_dif75_00,y=X197580)) + geom_point() +
+#   geom_smooth(method='lm',se=F) + ggtitle("Temperature Increase from 1900 to 1975 vs Migration")
+
+
+# Temperature rise and migration II: grids with extreme change in temp
+lowbound= -2; hghbound=  3
+ggplot(clidel12ann_grd %>% filter(Tmp_dif75_00 <= lowbound | Tmp_dif75_00 >= hghbound), 
+  aes(x=Tmp_dif75_00,y=log(X197580))) + geom_point() + 
+  ylab('Net migration') + xlab('Temperature Change') +
+  geom_vline(xintercept=0, linetype='dotted', color='grey40', size=0.5) +
+  geom_hline(yintercept=0, linetype='dotted', color='grey40', size=0.5) +
+  geom_smooth(data= clidel12ann_grd %>% filter(Tmp_dif75_00 <= lowbound), size=0.5,se=F,col='blue') + 
+  geom_smooth(data= clidel12ann_grd %>% filter(Tmp_dif75_00 >= hghbound), size=0.5,se=F,col='red') + 
+  theme_minimal() + ggtitle("95%ile grids: Temperature rise (1900 to 1975) vs Migration 1975-80")
+
+
+# Map Migration 
+gmp1 <- ggplot() + geom_sf(data = clidel12ann_grd, aes(fill = X197580), lwd=0) + 
+  theme_void() + theme(legend.position="bottom") + ggtitle("Net Migraiton 1975-80") + 
+  scale_fill_viridis_c(breaks = quantile(clidel12ann_grd$X197580, seq(0,1,0.2)),
+                       option = "magma",trans = scales::pseudo_log_trans(sigma = 0.001))
+gmp1
   
+# Map Temp Chnage 
+gmp2 <- ggplot() + geom_sf(data = clidel12ann_grd, aes(fill = Tmp_dif75_00), lwd=0) + 
+  theme_void() + theme(legend.position="bottom") + ggtitle("Temperature Increase from 1900 to 1975") +
+  scale_fill_viridis_c(breaks = quantile(clidel12ann_grd$Tmp_dif75_00, seq(0,1,0.2)),
+                       option = "inferno",trans = scales::pseudo_log_trans(sigma = 0.001))
+
+gmp2
+```
+
+
+
+
+
+
+## Data Sources & Assumptions 
+
+### Data
+* Sources: Migration, Weather, Remote Sensing
+  + [Clicim](https://publications.jrc.ec.europa.eu/repository/handle/JRC121003) ~27.5 km (0.25 degree)
+  + [Udelaware Weather Data](http://climate.geog.udel.edu/~climate/html_pages/download.html) ~55 km (0.5 degree)
+  + [MODIS LP-DAAC](https://lpdaac.usgs.gov/news/lp-daac-releases-modis-version-61-land-cover-type-data-products/)~ (Croparea, water, vegetation etc) raster extracted at 55km 
+  + [GHSL Population and Urbnization](https://ghsl.jrc.ec.europa.eu/) ~ raster extracted at 55km 
+  + [Nightlights](https://eogdata.mines.edu/products/vnl/) ~ raster extracted at 55km 
+
+* Handling different resolutions and data merge 
+  + UDelaware grid used as base: size is close to adm2-adm1 boundaries to help integrate census/admin data later
+  + All rasters extracted at 55km 
+  + Clicim raw data aggreagted at 55km
 
 ### Assumptions
 * Reducing dimensions
@@ -26,14 +78,10 @@ options(scipen=99)
   +  Weather: which years to consider ?
     + Currenly taking difference from 1900 for all years overlapping with Clcim 
 
+
+
+
+
+### Climate Migration: Data Notes
 * Outliers
   + Case of Tehran: 8 million emigrated in 1975
-
-
-```{r, echo=F, warning=F, message=F}
-load('/Users/parthkhare/Desktop/CGD/Projects/Climate migration/data/merged/Udel_Clicim_merge_diffdimension/clicim_udel_12ann.RData')
-
-
-plot(clicim_udel_12ann["X197580"])
-
-```
