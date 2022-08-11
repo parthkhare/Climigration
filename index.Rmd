@@ -13,7 +13,8 @@ options(scipen=99)
 
 ## Climate Migration: Data Trends
 
-Analysing increase in ling
+Analysing increase emigration patterns from change in weather.
+
 ```{r, echo=F, warning=F, message=F}
 load('/Users/parthkhare/Desktop/CGD/Projects/Climate migration/data/merged/Udel_Clicim_merge_diffdimension/clicim_udel_12ann_wgrd.RData')
 
