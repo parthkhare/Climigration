@@ -7,12 +7,13 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(data.table); library(leaflet); library(ggplot2);library(sf)
-library(dplyr); library(tidyverse)
+library(dplyr); library(tidyverse); library(ggspatial)
 options(scipen=99)
 ```
 
 ## Climate Migration: Data Trends
 
+Analysing increase in ling
 ```{r, echo=F, warning=F, message=F}
 load('/Users/parthkhare/Desktop/CGD/Projects/Climate migration/data/merged/Udel_Clicim_merge_diffdimension/clicim_udel_12ann_wgrd.RData')
 
@@ -35,14 +36,16 @@ ggplot(clidel12ann_grd %>% filter(Tmp_dif75_00 <= lowbound | Tmp_dif75_00 >= hgh
 
 
 # Map Migration 
-gmp1 <- ggplot() + geom_sf(data = clidel12ann_grd, aes(fill = X197580), lwd=0) + 
+gmp1 <- ggplot() + annotation_map_tile("cartolight") +
+  geom_sf(data = clidel12ann_grd, aes(fill = X197580), lwd=0) + 
   theme_void() + theme(legend.position="bottom") + ggtitle("Net Migraiton 1975-80") + 
   scale_fill_viridis_c(breaks = quantile(clidel12ann_grd$X197580, seq(0,1,0.2)),
                        option = "magma",trans = scales::pseudo_log_trans(sigma = 0.001))
 gmp1
   
 # Map Temp Chnage 
-gmp2 <- ggplot() + geom_sf(data = clidel12ann_grd, aes(fill = Tmp_dif75_00), lwd=0) + 
+gmp2 <- ggplot() + annotation_map_tile("cartolight") +
+  geom_sf(data = clidel12ann_grd, aes(fill = Tmp_dif75_00), lwd=0) + 
   theme_void() + theme(legend.position="bottom") + ggtitle("Temperature Increase from 1900 to 1975") +
   scale_fill_viridis_c(breaks = quantile(clidel12ann_grd$Tmp_dif75_00, seq(0,1,0.2)),
                        option = "inferno",trans = scales::pseudo_log_trans(sigma = 0.001))
