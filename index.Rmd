@@ -1,5 +1,5 @@
 ---
-title: "Climate Migration: First look-Spatial spread & trends"
+title: "Climate Migration:Data-Spatial trends"
 author: "Parth Khare"
 output: html_document
 ---
