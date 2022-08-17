@@ -1,5 +1,5 @@
 ---
-title: "Climate Migration: First look: data & trends"
+title: "Climate Migration: First look-Spatial spread & trends"
 author: "Parth Khare"
 output: html_document
 ---
@@ -49,7 +49,7 @@ Following 3 maps show the net migration from Clicim from the latest period along
 # Map Migration
 gmp1 <- ggplot() + annotation_map_tile("cartolight") +
   geom_sf(data=clidel12ann,aes(fill=X201015), lwd=0) +
-  theme_void() + theme(legend.position="bottom") + ggtitle("Net Migraiton 2010-2015") +
+  theme_void() + theme(legend.position="right") + ggtitle("Net Migraiton 2010-2015") +
   scale_fill_viridis_c(breaks = quantile(clidel12ann$X197580, seq(0,1,0.2)),
                        option = "magma",trans = scales::pseudo_log_trans(sigma = 0.001))
 gmp1
@@ -58,7 +58,7 @@ gmp1
 # clidel12ann$Tmpdf.2015_1900 <- clidel12ann$Temp_2015 - clidel12ann$Temp_1900
 gmp2 <- ggplot() + annotation_map_tile("cartolight") +
   geom_sf(data=clidel12ann,aes(fill = Tmpdf.2015_1900), lwd=0) +
-  theme_void() + theme(legend.position="bottom") + ggtitle("Long term temperature change (2015-1900)") +
+  theme_void() + theme(legend.position="right") + ggtitle("Long term temperature change (2015-1900)") +
   scale_fill_viridis_c(breaks = quantile(clidel12ann$Tmpdf.2015_1900, seq(0,1,0.2)),
                        option = "inferno",trans = scales::pseudo_log_trans(sigma = 0.001))
 
@@ -69,7 +69,7 @@ gmp2
 # clidel12ann$Tmpdf.2015_1970 <- clidel12ann$Temp_2015 - clidel12ann$Temp_1970
 gmp3 <- ggplot() + annotation_map_tile("cartolight") +
   geom_sf(data =clidel12ann, aes(fill = Tmpdf.2015_1970), lwd=0) +
-  theme_void() + theme(legend.position="bottom") + ggtitle("Shorter term temperature change (2015-1970)") +
+  theme_void() + theme(legend.position="right") + ggtitle("Shorter term temperature change (2015-1970)") +
   scale_fill_viridis_c(breaks = quantile(clidel12ann$Tmpdf.2015_1970, seq(0,1,0.2)),
                        option = "inferno",trans = scales::pseudo_log_trans(sigma = 0.001))
 
@@ -236,6 +236,7 @@ ggplot(clidel12ann_short %>% filter(Tmpdf.2015_1970 <= lowbound | Tmpdf.2015_197
 ```
 
 
+-----------------------------------------------------------------------------------
 -----------------------------------------------------------------------------------
 
 
