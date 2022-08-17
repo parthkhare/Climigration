@@ -1,5 +1,5 @@
 ---
-title: "Climate Migration: first look data & trends"
+title: "Climate Migration: First look: data & trends"
 author: "Parth Khare"
 output: html_document
 ---
@@ -10,49 +10,67 @@ library(data.table); library(leaflet); library(ggplot2);library(sf)
 library(dplyr); library(tidyverse); library(ggspatial)
 options(scipen=99)
 
+# Function for subset 
+# -------------------------
+substrRight <- function(x, n){
+  substr(x, nchar(x)-n+1, nchar(x))
+}
+
+
+# Load merged data
+# -------------------------
 load('/Users/parthkhare/Desktop/CGD/Projects/Climate migration/data/merged/Udel_Clicim_merge_diffdimension/clicim_udel_12ann_wgrd.RData')
 
-# Define short and long term
-# Long Temp Change 
-clidel12ann_grd$Tmpdf.2015_1900 <- clidel12ann_grd$Temp_2015 - clidel12ann_grd$Temp_1900
-# Short terms increase
-clidel12ann_grd$Tmpdf.2015_1970 <- clidel12ann_grd$Temp_2015 - clidel12ann_grd$Temp_1970
+# Subset the merged data to just exclude Greenland
+# -------------------------
+clidel12ann <- clidel12ann_grd[substrRight(clidel12ann_grd$UdelID,5)<68,]
 
+
+# Define short and long term
+# -------------------------
+# Long Temp Change 
+clidel12ann$Tmpdf.2015_1900 <- clidel12ann$Temp_2015 - clidel12ann$Temp_1900
+# Short terms increase
+clidel12ann$Tmpdf.2015_1970 <- clidel12ann$Temp_2015 - clidel12ann$Temp_1970
 ```
 
-Hi all, 
+The following work in progress post attempts to summarize compiled data to get a spatial sense of data. We now have information on migration, weather, land use classifications and recent nightlights (full data details shared in data section below). &nbsp;
 
-Have a prepared the following work in progress posts to summarizes basic insights from the data we have compiled over the past few months. We have information on migration, weather, land use classifications and recent nightlights (full details shared in data section below). Am currently overlaying rural and urban regions to test our primary hypothesis on the data. Meanwhile sharing maps on regions with high emigration and high temperature increase, to get a spatial sense of data. As a 101 check have compared regions of highest temperature increase with high emigration to sieve any straightforward correspondence.Given the size and complexity of merging these dataset, would be grateful to get your thoughts on any checks/hypotheses/focus regions.
+Following are some maps net migration, and long/short temperature changes along with focused regions with high emigration and high temperature increase. As a 101 check have compared regions of highest temperature increase with high emigration to sieve any straightforward correspondence between drastic temperature change and migration. Am currently overlaying rural and urban regions to test our primary hypothesis on the data. 
 
+Look forward to get your thoughts on possible hypothesis to run, am currently working on  rural-urban shifts to test for our primary hypothesis.
+
+&nbsp;&nbsp;
 
 #### Overview: Net migraiton, long and short term temperature changes 
+Following 3 maps show the net migration from Clicim from the latest period along with long terms increase in temperature (2015-1900) and short term increase in temperature (2015-1970).  
+
 ```{r, echo=F, message=F}
 # Map Migration
 gmp1 <- ggplot() + annotation_map_tile("cartolight") +
-  geom_sf(data = clidel12ann_grd, aes(fill = X201015), lwd=0) +
+  geom_sf(data=clidel12ann,aes(fill=X201015), lwd=0) +
   theme_void() + theme(legend.position="bottom") + ggtitle("Net Migraiton 2010-2015") +
-  scale_fill_viridis_c(breaks = quantile(clidel12ann_grd$X197580, seq(0,1,0.2)),
+  scale_fill_viridis_c(breaks = quantile(clidel12ann$X197580, seq(0,1,0.2)),
                        option = "magma",trans = scales::pseudo_log_trans(sigma = 0.001))
 gmp1
 
-  
 # Long Temp Change 
-# clidel12ann_grd$Tmpdf.2015_1900 <- clidel12ann_grd$Temp_2015 - clidel12ann_grd$Temp_1900
+# clidel12ann$Tmpdf.2015_1900 <- clidel12ann$Temp_2015 - clidel12ann$Temp_1900
 gmp2 <- ggplot() + annotation_map_tile("cartolight") +
-  geom_sf(data = clidel12ann_grd, aes(fill = Tmpdf.2015_1900), lwd=0) +
-  theme_void() + theme(legend.position="bottom") + ggtitle("Long term temperature change (2015-1900") +
-  scale_fill_viridis_c(breaks = quantile(clidel12ann_grd$Tmpdf.2015_1900, seq(0,1,0.2)),
+  geom_sf(data=clidel12ann,aes(fill = Tmpdf.2015_1900), lwd=0) +
+  theme_void() + theme(legend.position="bottom") + ggtitle("Long term temperature change (2015-1900)") +
+  scale_fill_viridis_c(breaks = quantile(clidel12ann$Tmpdf.2015_1900, seq(0,1,0.2)),
                        option = "inferno",trans = scales::pseudo_log_trans(sigma = 0.001))
 
 gmp2
 
 
 # Short terms increase
-# clidel12ann_grd$Tmpdf.2015_1970 <- clidel12ann_grd$Temp_2015 - clidel12ann_grd$Temp_1970
+# clidel12ann$Tmpdf.2015_1970 <- clidel12ann$Temp_2015 - clidel12ann$Temp_1970
 gmp3 <- ggplot() + annotation_map_tile("cartolight") +
-  geom_sf(data = clidel12ann_grd, aes(fill = Tmpdf.2015_1970), lwd=0) +
-  theme_void() + theme(legend.position="bottom") + ggtitle("Shorter term temperature change (2015-1970") +
-  scale_fill_viridis_c(breaks = quantile(clidel12ann_grd$Tmpdf.2015_1970, seq(0,1,0.2)),
+  geom_sf(data =clidel12ann, aes(fill = Tmpdf.2015_1970), lwd=0) +
+  theme_void() + theme(legend.position="bottom") + ggtitle("Shorter term temperature change (2015-1970)") +
+  scale_fill_viridis_c(breaks = quantile(clidel12ann$Tmpdf.2015_1970, seq(0,1,0.2)),
                        option = "inferno",trans = scales::pseudo_log_trans(sigma = 0.001))
 
 gmp3
@@ -65,12 +83,12 @@ gmp3
 ### High emigration regions 
 Further focusing on high emigrating regions, following maps is based on Clicim data, which started from 1975 and ends at 2015, and collates data at a 5 year interval. The map shows the regions where emigration was more than 90%ile globally over the past 40 years, covering around 4k grids globally. The adjoining scale shows compares the highest emigrations within these 4k highest emigrating grids. Based on the maps, we see a consistent churn in China, India, coastal regions of Brazil, Aregntina and parts of equatorial and south Africa, which I believe could be explained to a certain through social mobility and higher growth.
 
-PS:have excluded Tehran from this as it seemed to have some issue with data (recording almost 8million emigration consistently).
+PS:Have excluded Tehran from this as it seemed to have some issue with data (recording almost 8million emigration consistently).
 
-```{r clidel12ann_grd, echo=F, message=F}
+```{r clidel12ann, echo=F, message=F}
 # Create a copy of the data to choose datasets for final analysis
 # ----------------------
-grcp <- clidel12ann_grd
+grcp <- clidel12ann
 
 #### -------  Triangulate location
 # GRID WITH MOST Movement
@@ -111,15 +129,17 @@ rm(grcp)
 
 -----------------------------------------------------------------------------------
 
-### High temperature change
+### Regions with maximum temperature change 
 Regions with maximum long and short term change in temperature over the past 40 years. Synchronizing with the Clicim timeline, the 2 maps show the highlights the grids with long term increase in temperature from 1900, i.e. taking the difference in annual average temperature from between 1975 & 1900, 2015 & 1900 and 2 maps with short term increase in temp i.e. relative to 1970.
+
+
 
 ```{r grcp, echo=F, message=F}
 # load('/Users/parthkhare/Desktop/CGD/Projects/Climate migration/data/merged/Udel_Clicim_merge_diffdimension/clicim_udel_12ann_wgrd.RData')
 
 # Create a copy of the data to choose datasets for final analysis
 # ----------------------
-grcptmp <- clidel12ann_grd
+grcptmp <- clidel12ann
 
 # Preapre temp change variables
 grcptmp$Tmpdf.1975_1900 <- grcptmp$Temp_1975 - grcptmp$Temp_1900
@@ -158,9 +178,16 @@ rm(grcptmp)
 
 
 
-### 101: Do extreme temperature change correspond with high emigration?
+### 101: Do drastic temperature change correspond with high emigration?
 
-The charts below compare this for short and long term temperature increase.
+The charts below tries to test if regions with extreme temperature change in short and long term periods experienced high emigration 
+
+X-axis: shows long and short term temperature change
+
+Y-axis: Emigration in regions with drastic temperature change 
+
+The slope in red (increase in temp) and blue (decrease in temp) color captures presence of any direct trend. Unsurprisingly, we don't observe any strong trend (tried it for different time horizons and temperature bounds). However, there is still slight evidence for shorter term period.This is not exactly discouraging as the intent of this exercise was just to sieve out regions where such correspondence was clearly evident. Hopefully overlaying more layers of data i.e. urban and rural data might help.
+
 
 ```{r, echo=F, warning=F, message=F}
 # load('/Users/parthkhare/Desktop/CGD/Projects/Climate migration/data/merged/Udel_Clicim_merge_diffdimension/clicim_udel_12ann_wgrd.RData')
@@ -175,33 +202,37 @@ The charts below compare this for short and long term temperature increase.
 # Long term increase
 # ---------------------------
 # Temperature rise and migration II: grids with extreme change in temp
-lowbound= -3; hghbound=3
-ggplot(clidel12ann_grd %>% filter(Tmpdf.2015_1900 <= lowbound | Tmpdf.2015_1900 >= hghbound), 
-  # aes(x=Tmpdf.2015_1900,y=log(X201015*(-1)))) + geom_point() + 
-  aes(x=Tmpdf.2015_1900,y=log(abs(X201015)))) + geom_point() + 
-  ylab('Net migration') + xlab('Temperature Change') +
+lowbound=-2; hghbound=3
+ggplot(clidel12ann %>% filter(Tmpdf.2015_1900 <= lowbound | Tmpdf.2015_1900 >= hghbound), 
+  aes(x=Tmpdf.2015_1900,y=log(X201015*(-1)))) + geom_point() +
+  # aes(x=Tmpdf.2015_1900,y=log(abs(X201015)))) + geom_point() + 
+  ylab('Net migration') + xlab('Annual temperature change in 115 years') +
   geom_vline(xintercept=0, linetype='dotted', color='grey40', size=0.5) +
   geom_hline(yintercept=0, linetype='dotted', color='grey40', size=0.5) +
-  geom_smooth(data= clidel12ann_grd %>% filter(Tmpdf.2015_1900 <= lowbound), size=0.5,se=F,col='blue') + 
-  geom_smooth(data= clidel12ann_grd %>% filter(Tmpdf.2015_1900 >= hghbound), size=0.5,se=F,col='red') + 
-  theme_minimal() + ggtitle("95%ile grids: Temperature rise (1900 to 1975) vs Migration 1975-80")
+  geom_smooth(data= clidel12ann %>% filter(Tmpdf.2015_1900 <= lowbound), size=0.5,se=F,col='blue') + 
+  geom_smooth(data= clidel12ann %>% filter(Tmpdf.2015_1900 >= hghbound), size=0.5,se=F,col='red') + 
+  theme_minimal() + ggtitle("95%ile grids:Temperature rise(1900 to 1975) vs Emigration 2010-15")
 
 
+cat('\n')
 
 # ---------------------------
 # Short term increase
 # ---------------------------
+clidel12ann_short <- clidel12ann[clidel12ann$Tmpdf.2015_1970 < 10,]
+
+
 # Temperature rise and migration II: grids with extreme change in temp
-lowbound= -3; hghbound=3  
-ggplot(clidel12ann_grd %>% filter(Tmpdf.2015_1970 <= lowbound | Tmpdf.2015_1970 >= hghbound), 
-  # aes(x=Tmpdf.2015_1970,y=log(X201015*(-1)))) + geom_point() + 
-  aes(x=Tmpdf.2015_1970,y=log(abs(X201015)))) + geom_point() + 
-  ylab('Net migration') + xlab('Temperature Change') +
+lowbound=-2; hghbound=3.5  
+ggplot(clidel12ann_short %>% filter(Tmpdf.2015_1970 <= lowbound | Tmpdf.2015_1970 >= hghbound), 
+  aes(x=Tmpdf.2015_1970,y=log(X201015*(-1)))) + geom_point() +
+  # aes(x=Tmpdf.2015_1970,y=log(abs(X201015)))) + geom_point() + 
+  ylab('Net migration') + xlab('Annual temperature change in 45 years') +
   geom_vline(xintercept=0, linetype='dotted', color='grey40', size=0.5) +
   geom_hline(yintercept=0, linetype='dotted', color='grey40', size=0.5) +
-  geom_smooth(data= clidel12ann_grd %>% filter(Tmpdf.2015_1970 <= lowbound), size=0.5,se=F,col='blue') + 
-  geom_smooth(data= clidel12ann_grd %>% filter(Tmpdf.2015_1970 >= hghbound), size=0.5,se=F,col='red') + 
-  theme_minimal() + ggtitle("95%ile grids: Temperature rise (1900 to 1975) vs Migration 1975-80")
+  geom_smooth(data= clidel12ann_short %>% filter(Tmpdf.2015_1970 <= lowbound), size=0.5,se=F,col='blue') + 
+  geom_smooth(data= clidel12ann_short %>% filter(Tmpdf.2015_1970 >= hghbound), size=0.5,se=F,col='red') + 
+  theme_minimal() + ggtitle("95%ile grids:Temperature rise(1970 to 2015) vs Emigration 2010-15")
 ```
 
 
