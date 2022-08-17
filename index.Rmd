@@ -9,14 +9,121 @@ knitr::opts_chunk$set(echo = TRUE)
 library(data.table); library(leaflet); library(ggplot2);library(sf)
 library(dplyr); library(tidyverse); library(ggspatial)
 options(scipen=99)
+
+load('/Users/parthkhare/Desktop/CGD/Projects/Climate migration/data/merged/Udel_Clicim_merge_diffdimension/clicim_udel_12ann_wgrd.RData')
 ```
 
-## Climate Migration: Data Trends
+## Climate Migration: Basic Trends
 
-Analysing increase emigration patterns from change in weather.
+Hi all, the following posts summarizes basic insights from the data we have compiled over the past few months. We have information on migration, weather, land use classifications and recent nightlights (full details shared in data section below). Am currently overlaying rural and urban regions to test our primary hypothesis on the data.  Meanwhile sharing following maps here just to share a spatial sense of the compiled data. As a 101 check have 
+
+Given the size and complexity of merging these datasets, would be grateful to get your thoughts on possible hypothesis/focus regions.
+
+
+### High emigration regions 
+Following maps is based on Clicim.The map indicates the regions where emigration was more than 90%ile globally over the past 40 years, covering around 4k grids globally. The adjoining scale shows compares the highest emigrations within these 4k highest emigrating grids. Based on the maps, we see a consistent churn in China, India, coastal regions of Brazil, Aregntina and parts of equatorial and south Africa, which I believe could be explained to a certain through social mobility and higher growth.
+
+PS:have excluded Tehran from this as it seemed to have some issue with data (recording almost 8million emigration consistently).
+
+```{r clidel12ann_grd, echo=F, message=F}
+# Create a copy of the data to choose datasets for final analysis
+# ----------------------
+grcp <- clidel12ann_grd
+
+#### -------  Triangulate location
+# GRID WITH MOST Movement
+#### -------  Triangulate location
+grcp$X197580 <- grcp$X197580*(-1); grcp$X198085 <- grcp$X198085*(-1)
+grcp$X198590 <- grcp$X198590*(-1); grcp$X199095 <- grcp$X199095*(-1)
+grcp$X199500 <- grcp$X199500*(-1); grcp$X200005 <- grcp$X200005*(-1)
+grcp$X200510 <- grcp$X200510*(-1); grcp$X201015 <- grcp$X201015*(-1)
+
+# allmig <- c('X197580','X198085','X198590','X199095','X199500','X200005','X200510','X201015')
+submig <- c('X197580','X199095','X200005','X201015')
+
+for(i in 1:length(submig))
+{
+  # Maximum Movement
+  mig_qcut = 0.90
+  
+  # Number of rows of subsetted data
+  # ----------------------
+  nrow(grcp %>% filter(grcp[[submig[i]]] > quantile(grcp[[submig[i]]], mig_qcut)))
+  hghemi = grcp %>% filter(grcp[[submig[i]]] > quantile(grcp[[submig[i]]], mig_qcut))
+  class(hghemi)
+  
+  # Map: Emigration specific cuts
+  # ----------------------
+  gm1 <- ggplot() + annotation_map_tile("cartolight") +
+    geom_sf(data = hghemi, aes(fill = get(submig[i])), lwd=0) +  ggtitle(submig[i]) +
+    theme_void() + theme(legend.position="right") +labs(fill = "regions > 90%ile emigration") +
+    scale_fill_viridis_c(breaks = quantile(hghemi[[submig[i]]], seq(0,1,0.2)),
+                         option = "inferno",trans = scales::pseudo_log_trans(sigma = 0.001))
+  gm1
+  
+  print(gm1)
+}
+rm(grcp)
+```
+
+
+### High temperature change
+
+Regions with maximum change in temperature over the past 40 years. Mapping with the Clicim timeline, the following maps show the regions with highest increase in temperature from 1900, i.e. taking the difference in annual average temperature from 1975 and 1900, 1990 and 100 and so on.
+
+
+
+```{r grcp, echo=F, message=F}
+# load('/Users/parthkhare/Desktop/CGD/Projects/Climate migration/data/merged/Udel_Clicim_merge_diffdimension/clicim_udel_12ann_wgrd.RData')
+
+# Create a copy of the data to choose datasets for final analysis
+# ----------------------
+grcptmp <- clidel12ann_grd
+
+# Preapre temp change variables
+grcptmp$Tmpdf.75_00 <- grcptmp$Temp_1975 - grcptmp$Temp_1900
+grcptmp$Tmpdf.90_00 <- grcptmp$Temp_1990 - grcptmp$Temp_1900
+grcptmp$Tmpdf.20_00 <- grcptmp$Temp_2000 - grcptmp$Temp_1900
+grcptmp$Tmpdf.15_00 <- grcptmp$Temp_2015 - grcptmp$Temp_1900
+
+subtemp <- c('Tmpdf.75_00','Tmpdf.90_00','Tmpdf.20_00','Tmpdf.15_00')
+
+
+
+for(i in 1:length(subtemp))
+{
+  # Maximum Movement
+  tmp_qcut = 0.90
+  
+  # Number of rows of subsetted data
+  # ----------------------
+  nrow(grcptmp %>% filter(grcptmp[[subtemp[i]]] > quantile(grcptmp[[subtemp[i]]], tmp_qcut)))
+  hghtmp = grcptmp %>% filter(grcptmp[[subtemp[i]]] > quantile(grcptmp[[subtemp[i]]], tmp_qcut))
+
+  # Map: Emigration specific cuts
+  # ----------------------
+  gm1 <- ggplot() + annotation_map_tile("cartolight") +
+    geom_sf(data = hghtmp, aes(fill = get(subtemp[i])), lwd=0) +  ggtitle(subtemp[i]) +
+    theme_void() + theme(legend.position="right") +labs(fill = "regions > 90%ile temp inc.") +
+    scale_fill_viridis_c(breaks = quantile(hghtmp[[subtemp[i]]], seq(0,1,0.2)),
+                         option = "inferno",trans = scales::pseudo_log_trans(sigma = 0.001))
+  gm1
+  
+  print(gm1)
+}
+rm(grcptmp)
+```
+
+
+
+
+### 101: Do regions of high temperature increase correspond with high emigration?
+
+Based on the maps above, 
+
 
 ```{r, echo=F, warning=F, message=F}
-load('/Users/parthkhare/Desktop/CGD/Projects/Climate migration/data/merged/Udel_Clicim_merge_diffdimension/clicim_udel_12ann_wgrd.RData')
+# load('/Users/parthkhare/Desktop/CGD/Projects/Climate migration/data/merged/Udel_Clicim_merge_diffdimension/clicim_udel_12ann_wgrd.RData')
 
 
 # Temperature rise and migration I: all grids
@@ -35,14 +142,13 @@ ggplot(clidel12ann_grd %>% filter(Tmp_dif75_00 <= lowbound | Tmp_dif75_00 >= hgh
   geom_smooth(data= clidel12ann_grd %>% filter(Tmp_dif75_00 >= hghbound), size=0.5,se=F,col='red') + 
   theme_minimal() + ggtitle("95%ile grids: Temperature rise (1900 to 1975) vs Migration 1975-80")
 
-
-# Map Migration 
-gmp1 <- ggplot() + annotation_map_tile("cartolight") +
-  geom_sf(data = clidel12ann_grd, aes(fill = X197580), lwd=0) + 
-  theme_void() + theme(legend.position="bottom") + ggtitle("Net Migraiton 1975-80") + 
-  scale_fill_viridis_c(breaks = quantile(clidel12ann_grd$X197580, seq(0,1,0.2)),
-                       option = "magma",trans = scales::pseudo_log_trans(sigma = 0.001))
-gmp1
+# # Map Migration 
+# gmp1 <- ggplot() + annotation_map_tile("cartolight") +
+#   geom_sf(data = clidel12ann_grd, aes(fill = X197580), lwd=0) + 
+#   theme_void() + theme(legend.position="bottom") + ggtitle("Net Migraiton 1975-80") + 
+#   scale_fill_viridis_c(breaks = quantile(clidel12ann_grd$X197580, seq(0,1,0.2)),
+#                        option = "magma",trans = scales::pseudo_log_trans(sigma = 0.001))
+# gmp1
   
 # Map Temp Chnage 
 gmp2 <- ggplot() + annotation_map_tile("cartolight") +
@@ -55,7 +161,7 @@ gmp2
 ```
 
 
-
+###-----------------------------------------------------------------------------------
 
 
 
@@ -63,27 +169,25 @@ gmp2
 
 ### Data
 * Sources: Migration, Weather, Remote Sensing
-  + [Clicim](https://publications.jrc.ec.europa.eu/repository/handle/JRC121003) ~27.5 km (0.25 degree)
-  + [Udelaware Weather Data](http://climate.geog.udel.edu/~climate/html_pages/download.html) ~55 km (0.5 degree)
+  + [Clicim](https://publications.jrc.ec.europa.eu/repository/handle/JRC121003) ~27.5 km (0.25 degree) - 85794 grids
+  + [Udelaware Weather Data](http://climate.geog.udel.edu/~climate/html_pages/download.html) ~55 km (0.5 degree) - 41794 grids
   + [MODIS LP-DAAC](https://lpdaac.usgs.gov/news/lp-daac-releases-modis-version-61-land-cover-type-data-products/)~ (Croparea, water, vegetation etc) raster extracted at 55km 
   + [GHSL Population and Urbnization](https://ghsl.jrc.ec.europa.eu/) ~ raster extracted at 55km 
   + [Nightlights](https://eogdata.mines.edu/products/vnl/) ~ raster extracted at 55km 
 
 * Handling different resolutions and data merge 
+  + all the datasets above have been collapsed at Udelaware grid 55km
   + UDelaware grid used as base: size is close to adm2-adm1 boundaries to help integrate census/admin data later
   + All rasters extracted at 55km 
   + Clicim raw data aggreagted at 55km
 
 ### Assumptions
 * Reducing dimensions
-  +  Weather: choosing months or annual values?
+  +  Weather: choosing months or annual values? (refer to literature)
     + months might display additional variability
     + taking annual for first cut model
   +  Weather: which years to consider ?
     + Currenly taking difference from 1900 for all years overlapping with Clcim 
-
-
-
 
 
 ### Climate Migration: Data Notes
